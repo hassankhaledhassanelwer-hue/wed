@@ -1200,6 +1200,15 @@
     });
     $$('[data-img]').forEach(img=>{ const v=doc[img.dataset.img]; if(!v) return; if(img.tagName==='IMG') img.src=v; else img.style.backgroundImage='url("'+v+'")'; });
     $$('[data-href]').forEach(a=>{ const v=doc[a.dataset.href]; if(v) a.href=v; });
+    $$('[data-extra]').forEach(a=>a.remove());
+    for(let i=1;i<=10;i++){
+      const nm=String(doc['social.x'+i+'.name']||'').trim(), u=String(doc['social.x'+i+'.url']||'').trim();
+      if(!nm||!/^(https?:|mailto:|tel:)/i.test(u)) continue;
+      const mk=txt=>{ const a=document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener'; a.setAttribute('data-extra','1'); a.setAttribute('aria-label',nm); a.textContent=txt; return a; };
+      const s1=$('.socials'), s2=$('.footer-socials');
+      if(s1) s1.appendChild(mk(nm.slice(0,2).toUpperCase()));
+      if(s2) s2.appendChild(mk(nm));
+    }
     $$('.socials a,.footer-socials a').forEach(a=>{ const h=a.getAttribute('href'); a.hidden=!h||h==='#'; });
     const li=$('#logoImg'); if(doc['logo.img']){ li.src=doc['logo.img']; li.hidden=false; $('#logoTxt').hidden=true; } else { li.hidden=true; $('#logoTxt').hidden=false; }
     $$('.work-card').forEach(card=>{
@@ -1364,7 +1373,8 @@
     {const f=[]; for(let i=1;i<=N.testi;i++){ f.push({k:'testi.'+i+'.q',l:'رأي 0'+i+' — النص',t:'area'},{k:'testi.'+i+'.who',l:'رأي 0'+i+' — الاسم والمصدر'}); } S.push({h:'آراء العملاء',f});}
     {const f=[]; for(let i=1;i<=N.book;i++){ f.push({k:'book.'+i+'.title',l:'كتاب 0'+i+' — الاسم'},{k:'book.'+i+'.file',l:'كتاب 0'+i+' — الملف (رابط تحميل أو ارفع PDF)',t:'file',accept:'application/pdf,.pdf,.epub,.zip'}); } S.push({h:'الكتب المجانية (فوتوشوب / إليستريتور / برمجة)',f});}
     S.push({h:'Contact',f:[{k:'contact.email',l:'Email',noar:true},{k:'contact.phone',l:'Phone / WhatsApp (نص العرض)',noar:true},{k:'contact.whatsapp',l:'رابط واتساب العائم (https://wa.me/...)',t:'url'},{k:'contact.loc',l:'الموقع الجغرافي'}]});
-    S.push({h:'روابط وسائل التواصل (اللي بدون رابط بتتخفى)',f:[{k:'social.instagram',l:'Instagram',t:'url'},{k:'social.behance',l:'Behance',t:'url'},{k:'social.linkedin',l:'LinkedIn',t:'url'},{k:'social.facebook',l:'Facebook',t:'url'},{k:'social.whatsapp',l:'WhatsApp',t:'url'}]});
+    const extraSocial=()=>{ const f=[{g:'منصات إضافية — اكتب اسم المنصة + الرابط (الخانة الفاضية بتتخفى)'}]; for(let i=1;i<=10;i++){ f.push({k:'social.x'+i+'.name',l:'منصة '+i+' — الاسم (مثلاً TikTok / YouTube / Telegram)',noar:true},{k:'social.x'+i+'.url',l:'منصة '+i+' — الرابط',t:'url'}); } return f; };
+    S.push({h:'روابط وسائل التواصل (اللي بدون رابط بتتخفى)',f:[{k:'social.instagram',l:'Instagram',t:'url'},{k:'social.behance',l:'Behance',t:'url'},{k:'social.linkedin',l:'LinkedIn',t:'url'},{k:'social.facebook',l:'Facebook',t:'url'},{k:'social.whatsapp',l:'WhatsApp',t:'url'}].concat(extraSocial())});
     S.push({h:'Footer',f:[{k:'footer.copy',l:'نص الحقوق'}]});
 
     let built=false;
