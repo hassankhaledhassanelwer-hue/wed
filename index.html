@@ -1498,6 +1498,53 @@
   })();
 
   /* =====================================================================
+     BACK BUTTON (mobile): closes the open window/menu/search instead of leaving the site
+  ===================================================================== */
+  (function(){
+    const admOv=$('#adminOverlay');
+    let pushed=false, ignorePop=false, tmr=null;
+    const anyOpen=()=> wm.classList.contains('open') || searchOv.classList.contains('open') || menu.classList.contains('open') || (admOv&&admOv.classList.contains('open'));
+    const mine=()=>{ try{ return !!(history.state && history.state.gdLayer); }catch(e){ return false; } };
+    function sync(){
+      const any=anyOpen();
+      if(any && !pushed){
+        try{ history.pushState({gdLayer:1},'',location.href); pushed=true; }catch(e){}
+      } else if(!any && pushed){
+        pushed=false;
+        if(mine()){                         // our own entry is on top → remove it silently
+          ignorePop=true; setTimeout(()=>{ ignorePop=false; },700);
+          try{ history.back(); }catch(e){ ignorePop=false; }
+        }
+      }
+    }
+    function schedule(){ clearTimeout(tmr); tmr=setTimeout(sync,120); }
+    window.addEventListener('popstate',()=>{
+      if(ignorePop){ ignorePop=false; return; }
+      if(pushed){
+        pushed=false;
+        if(wm.classList.contains('open')) closeWork();
+        if(searchOv.classList.contains('open')) closeSearch();
+        if(menu.classList.contains('open')) setMenu(false);
+        if(admOv && admOv.classList.contains('open')){ admOv.classList.remove('open'); }
+        if(!anyOpen()) root.classList.remove('no-scroll');
+      }
+    });
+    try{
+      const mo=new MutationObserver(schedule);
+      [wm,searchOv,menu,admOv].forEach(el=>{ if(el) mo.observe(el,{attributes:true,attributeFilter:['class']}); });
+    }catch(e){}
+    /* coming back to the page (app switch / restored tab): never leave it stuck or frozen */
+    function resume(){
+      try{
+        if(!anyOpen()){ pushed=false; root.classList.remove('no-scroll'); }
+        else schedule();
+      }catch(e){}
+    }
+    window.addEventListener('pageshow',resume);
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') resume(); });
+  })();
+
+  /* =====================================================================
      BOOT
   ===================================================================== */
   (async function(){
