@@ -1200,6 +1200,12 @@
     });
     $$('[data-img]').forEach(img=>{ const v=doc[img.dataset.img]; if(!v) return; if(img.tagName==='IMG') img.src=v; else img.style.backgroundImage='url("'+v+'")'; });
     $$('[data-href]').forEach(a=>{ const v=doc[a.dataset.href]; if(v) a.href=v; });
+    ['about','services','work','process','testi','books'].forEach(id=>{
+      const sec=document.getElementById(id); if(!sec) return;
+      const off=doc['show.'+id]==='0';
+      sec.style.display=off?'none':''; if(off) sec.setAttribute('data-off','1'); else sec.removeAttribute('data-off');
+      $$('#mainNav a[href="#'+id+'"], #mobileMenu a[href="#'+id+'"], .hero-actions a[href="#'+id+'"]').forEach(a=>{ a.style.display=off?'none':''; });
+    });
     $$('[data-extra]').forEach(a=>a.remove());
     for(let i=1;i<=10;i++){
       const nm=String(doc['social.x'+i+'.name']||'').trim(), u=String(doc['social.x'+i+'.url']||'').trim();
@@ -1299,8 +1305,9 @@
   function goTo(el){ closeSearch(); setTimeout(()=>el.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'}),60); }
   function buildIndex(){
     const items=[];
+    const $$=(q,r=document)=>Array.from(r.querySelectorAll(q)).filter(e=>!e.closest('[data-off]'));
     ['hero','about','services','work','process','books','contact'].forEach(id=>{
-      const sec=document.getElementById(id); if(!sec) return;
+      const sec=document.getElementById(id); if(!sec||sec.dataset.off) return;
       const nav=$('#mainNav a[data-nav="'+id+'"]'); const h=$('h2,h3',sec);
       const title = nav ? nav.textContent : (id==='books'?(lang==='ar'?'كتب مجانية':'Free Books'):id);
       items.push({title, sub:(h?h.textContent.replace(/\s+/g,' ').trim():''), tag:t('lblSection'), run:()=>goTo(sec)});
@@ -1356,6 +1363,7 @@
       {k:'logo.img',l:'صورة اللوجو (اختياري — بدل حروف GD)',t:'img'},
       {k:'@followers',l:'عدد المتابعين',t:'num'},
       {k:'@views',l:'عدد مشاهدات الموقع (بيزيد +1 تلقائيًا مع كل زيارة)',t:'num'}]});
+    S.push({h:'إظهار / إخفاء الأقسام',f:['about:من أنا (About)','services:اللي بعمله (What I Do — الخدمات)','work:أعمالي (Work)','process:خطوات العمل (Process)','testi:آراء العملاء','books:الكتب المجانية'].map(x=>{ const a=x.split(':'); return {k:'show.'+a[0],l:a[1],t:'select',opts:[['1','ظاهر'],['0','مخفي']],def:'1'}; })});
     S.push({h:'Hero',f:[
       {k:'hero.eyebrow',l:'Eyebrow'},{k:'hero.title1',l:'العنوان — السطر الأول'},{k:'hero.title2',l:'العنوان — السطر الثاني (بالأحمر)'},
       {k:'hero.desc',l:'النبذة التعريفية (بتتكتب حرف حرف)',t:'area'},
