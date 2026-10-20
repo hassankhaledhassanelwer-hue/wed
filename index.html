@@ -515,9 +515,9 @@
       <h2 class="big"><span data-i18n="about.t1">ABOUT</span><br><span data-i18n="about.t2">THE</span> <span class="accent" data-edit="about.accent">CREATIVE.</span></h2>
       <p class="lead" data-edit="about.lead">We create visual identities, digital experiences and interactive interfaces that connect brands with people — designed and built end to end, under one roof.</p>
       <div class="about-stats">
-        <div><b data-count="6" data-suffix="+">0</b><span data-i18n="about.s1">YEARS EXPERIENCE</span></div>
-        <div><b data-count="3" data-suffix="">0</b><span data-i18n="about.s2">CREATIVE FIELDS</span></div>
-        <div><b data-count="120" data-suffix="+">0</b><span data-i18n="about.s3">PROJECTS</span></div>
+        <div><b data-count="6" data-numkey="num.years" data-suffix="+">0</b><span data-i18n="about.s1">YEARS EXPERIENCE</span></div>
+        <div><b data-count="3" data-numkey="num.fields" data-suffix="">0</b><span data-i18n="about.s2">CREATIVE FIELDS</span></div>
+        <div><b data-count="120" data-numkey="num.projects" data-suffix="+">0</b><span data-i18n="about.s3">PROJECTS</span></div>
       </div>
     </div>
     <div class="portrait" data-rv="right"><img data-img="about.photo" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=60" alt="Portrait of the designer at work"></div>
@@ -593,9 +593,9 @@
 
 <section class="stats-cin">
   <div class="wrap">
-    <div><b data-count="6" data-suffix="+">0</b><span data-i18n="st.years">YEARS</span></div>
-    <div><b data-count="120" data-suffix="+">0</b><span data-i18n="st.projects">PROJECTS</span></div>
-    <div><b data-count="3" data-suffix="">0</b><span data-i18n="st.fields">FIELDS</span></div>
+    <div><b data-count="6" data-numkey="num.years" data-suffix="+">0</b><span data-i18n="st.years">YEARS</span></div>
+    <div><b data-count="120" data-numkey="num.projects" data-suffix="+">0</b><span data-i18n="st.projects">PROJECTS</span></div>
+    <div><b data-count="3" data-numkey="num.fields" data-suffix="">0</b><span data-i18n="st.fields">FIELDS</span></div>
     <div><b>∞</b><span data-i18n="st.ideas">IDEAS</span></div>
   </div>
 </section>
@@ -787,6 +787,7 @@
   DEF['testi.1.q']="Amazing visual work and attention to detail — GD turned a vague idea into a brand we're proud of."; DEF['testi.1.who']='HASSAN KHALED · Nova Coffee';
   DEF['testi.2.q']='Fast, precise and genuinely creative. Our new site loads instantly and looks exactly like the mockups.'; DEF['testi.2.who']='SARA AHMED · Finlytic';
   DEF['testi.3.q']='The motion work gave our launch a completely different energy. Clients noticed immediately.'; DEF['testi.3.who']='OMAR FAROUK · Pulse App';
+  DEF['num.years']='6'; DEF['num.projects']='120'; DEF['num.fields']='3';
   DEF['work.1.desc']='A data-rich analytics dashboard for a fintech startup — clean hierarchy, real-time charts and a dark UI built for long sessions.';
   DEF['work.2.desc']='Editorial layout for a quarterly magazine: bold typography, generous grids and a consistent visual rhythm across 64 pages.';
   DEF['work.3.desc']='Complete brand identity and storefront design for an independent studio — logo, packaging and a conversion-focused online store.';
@@ -1151,8 +1152,6 @@
       try{ localStorage.setItem('gd_followed','1'); }catch(e){}
       paintStats(true); paintFollow(); toast(t('followedMsg'));
     }
-    const link=['social.instagram','social.behance','social.linkedin','social.facebook'].map(k=>siteDoc[k]).find(u=>u&&u!=='#');
-    if(link) window.open(link,'_blank','noopener');
   });
   paintFollow();
 
@@ -1205,6 +1204,12 @@
       const off=doc['show.'+id]==='0';
       sec.style.display=off?'none':''; if(off) sec.setAttribute('data-off','1'); else sec.removeAttribute('data-off');
       $$('#mainNav a[href="#'+id+'"], #mobileMenu a[href="#'+id+'"], .hero-actions a[href="#'+id+'"]').forEach(a=>{ a.style.display=off?'none':''; });
+    });
+    $$('[data-numkey]').forEach(b=>{
+      const raw=doc[b.dataset.numkey]; if(raw==null||String(raw).trim()==='') return;
+      const v=parseInt(String(raw).replace(/\D/g,''),10); if(isNaN(v)) return;
+      b.dataset.count=v;
+      if(b.textContent.trim()!=='0') b.textContent=v+(b.dataset.suffix||'');   // already animated → update now
     });
     $$('[data-extra]').forEach(a=>a.remove());
     for(let i=1;i<=10;i++){
@@ -1363,6 +1368,10 @@
       {k:'logo.img',l:'صورة اللوجو (اختياري — بدل حروف GD)',t:'img'},
       {k:'@followers',l:'عدد المتابعين',t:'num'},
       {k:'@views',l:'عدد مشاهدات الموقع (بيزيد +1 تلقائيًا مع كل زيارة)',t:'num'}]});
+    S.push({h:'الأرقام والخبرات',f:[
+      {k:'num.years',l:'سنوات الخبرة (رقم فقط)',noar:true},
+      {k:'num.projects',l:'عدد المشاريع (رقم فقط)',noar:true},
+      {k:'num.fields',l:'عدد المجالات الإبداعية (رقم فقط)',noar:true}]});
     S.push({h:'إظهار / إخفاء الأقسام',f:['about:من أنا (About)','services:اللي بعمله (What I Do — الخدمات)','work:أعمالي (Work)','process:خطوات العمل (Process)','testi:آراء العملاء','books:الكتب المجانية'].map(x=>{ const a=x.split(':'); return {k:'show.'+a[0],l:a[1],t:'select',opts:[['1','ظاهر'],['0','مخفي']],def:'1'}; })});
     S.push({h:'Hero',f:[
       {k:'hero.eyebrow',l:'Eyebrow'},{k:'hero.title1',l:'العنوان — السطر الأول'},{k:'hero.title2',l:'العنوان — السطر الثاني (بالأحمر)'},
